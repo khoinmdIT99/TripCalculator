@@ -1,0 +1,55 @@
+﻿@model TripCalculator.Models.TripCalculatorViewModel.vmTripCalculator
+@*
+*@
+<script src="~/lib/jquery/dist/jquery.js"></script>
+<link rel="stylesheet" href="~/css/Shared/dfnToolTip.css" asp-append-version="true" />
+
+<h3>Travelers</h3>
+
+<div class="form-group">
+	<label onmouseover="SetToolTipWidth(220)"><dfn data-info="New Traveler's Full Name">New Traveler<span style="color:darkblue;"> </span>...</dfn></label>
+	<input ng-model="newTravelerName" title="" asp-for="@Model.newTraveler.TravelerName" id="newTravelerId" class="form-control" placeholder="Full Name" />
+	<span asp-validation-for="@Model.newTraveler.TravelerName" class="text-danger"></span>
+</div>
+<div class="form-group">
+	<button ng-click="AddTraveler()" type="submit" class="btn btn-primary">Add Traveler</button>
+</div>
+
+@*
+	<select multiple ng-model="thisTraveler">
+		<option ng-repeat="x in travelers" value="{{x.fullname}}">{{x.fullname}} - {{x.balance}}</option>
+	</select>
+
+	<select ng-model="thisTraveler" ng-options="x.fullname for x in travelers"></select>
+	<h1>Selected: {{thisTraveler.fullname}}</h1>
+*@
+<table class="TblFix">
+	<thead>
+		<tr style="font-family:Tahoma; font-size:large; height:40px; background-color:aliceblue;">
+			<th ng-click="getDetails('All')" class="cFullName">Traveler Name</th>
+			<th class="cAmountDue">Due</th>
+			<th class="cBalance">Balance</th>
+		</tr>
+	</thead>
+	<tr ng-repeat="t in travelers" style="border-bottom:solid thin; border-bottom-color:Highlight; height:30px;">
+		<td ng-click="getDetails(t)" class="cFullName">{{t.fullname}}</td>
+		<td class="cAmountDue {{(t.balance - TotalExpense / TravelerCount) > 0 ? 'cGreen':'cRed'}}">
+			{{(t.balance - TotalExpense / TravelerCount) | number:2}}
+		</td>
+		<td class="cBalance">{{t.balance | number:2}}</td>
+	</tr>
+	<tr style="font-family:Tahoma; font-size:large; height:40px; background-color:lightgoldenrodyellow;">
+		<td ng-click="getDetails('All')" class="cFullName">Average & Total Expense</td>
+		<td class="cAmountDue" title="This is average expense per traveler">{{(TotalExpense / TravelerCount) | number:2}} </td>
+		<td class="cBalance">{{TotalExpense | number:2}}</td>
+	</tr>
+</table>
+
+<script type="text/javascript">
+	function SetToolTipWidth(widthVal) {
+		try {
+			var styles = getComputedStyle(document.documentElement);
+			document.documentElement.style.setProperty('--width', widthVal + 'px');
+		} catch (err) { alert(err.message); }
+	}
+</script>

@@ -1,0 +1,13 @@
+﻿@model TripCalculator.Models.TripCalculatorViewModel.vmTripCalculator
+
+<div>
+	<h2 id="hdrSampleId" style="text-align:center;">Sample data is loaded</h2>
+	<div class="row col-sm-12">
+		<div class="col-sm-5">
+			@await Html.PartialAsync("~/Views/Home/_Travelers.cshtml", Model)
+		</div>
+		<div class="col-sm-7">
+			@await Html.PartialAsync("~/Views/Home/_Transactions.cshtml", Model)
+		</div>
+	</div>
+</div>

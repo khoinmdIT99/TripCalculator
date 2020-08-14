@@ -1,0 +1,170 @@
+﻿@using System.Globalization;
+@model TripCalculator.Models.TripCalculatorViewModel.vmTripCalculator
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular.min.js"></script>
+<style>
+    .TblFix { table-layout: fixed; width: 100%; white-space: nowrap; }
+    .TblFix td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .TblFix th { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+	.cFullName { width: 70%; font-family: Arial; color:darkblue; font-weight:bold; cursor:pointer; }
+	.cAmountDue { width: 20%; font-family: Arial; text-align:right; }
+	.cBalance { width: 30%; font-family: Arial; text-align:right; }
+
+	.cName { width: 35%; font-family: Arial; }
+	.cDescription { width: 35%; font-family: Arial; }
+	.cAmount { width: 20%; font-family: Arial; text-align:right; }
+	.cAction {width: 10%; font-family: Arial; text-align:right; }
+
+	.cGreen { color:green; font-size:larger; }
+	.cRed { color:red; font-size:larger; }
+</style>
+@{
+	ViewData["Title"] = "Home Page";
+}
+
+<div ng-app="myApp" ng-controller="myCtrl">
+	<h1 class="display-4">Trip Calculator
+	<span style="font-size:large;text-align:center;">
+		(click <span ng-click="ClearForm()" style="cursor:pointer;color:darkblue;font-size:xx-large;font-style:italic;">here</span> to clear the form)
+	</span>
+	</h1>
+
+	@await Html.PartialAsync("~/Views/Home/_TripCalculator.cshtml", Model)
+</div>
+
+<script>
+	var app = angular.module("myApp", []);
+	app.controller("myCtrl", function ($scope) {
+		$scope.selectedTraveler;
+		$scope.travelerTransactions;
+		$scope.TotalExpense = 0;
+		
+		$scope.travelers = [
+			{ fullname: "Richard Mneyan", balance: 0 },
+			{ fullname: "Desiree Morrow", balance: 0 },
+			{ fullname: "Gisselle Velasquez", balance: 0 },
+			{ fullname: "Kailyn Escobar", balance: 0 }
+		];
+		$scope.TravelerCount = $scope.travelers.length;
+
+		var sid = uuidv4();
+		$scope.transactions = [
+			{ Id: uuidv4(), fullname: "Richard Mneyan", description: "Air Travel", amount: 12.45 },
+			{ Id: uuidv4(), fullname: "Gisselle Velasquez", description: "Food", amount: 35.44 },
+			{ Id: uuidv4(), fullname: "Gisselle Velasquez", description: "Air Travel", amount: 25.54 },
+			{ Id: uuidv4(), fullname: "Richard Mneyan", description: "Air Travel", amount: 11.63 },
+			{ Id: uuidv4(), fullname: "Desiree Morrow", description: "Air Travel", amount: 25.44 },
+			{ Id: uuidv4(), fullname: "Gisselle Velasquez", description: "Food", amount: 35.44 },
+		];		
+
+		$scope.selTransactions = $scope.transactions; // display all transactions on load
+		refreshTravelersAndBalances();
+
+		$scope.getDetails = function (vTraveler) {
+			try {
+				if (vTraveler === "All") {
+					$scope.selectedTraveler = "All";
+					$scope.selTransactions = $scope.transactions;
+				} else {
+					$scope.selectedTraveler = vTraveler.fullname;
+					$scope.selTransactions = $scope.transactions.filter(t => t.fullname == vTraveler.fullname);
+				}
+			} catch (err) { alert(err.message); }
+		};
+
+		$scope.AddTraveler = function () {
+			try {
+				if ($scope.newTravelerName != null && $scope.newTravelerName.length > 0) {
+					$scope.travelers.push({
+						fullname: $scope.newTravelerName,
+						balance: 0,
+					});
+					$scope.TravelerCount = $scope.travelers.length;
+				}
+			} catch (err) { alert(err.message); }
+		};
+
+		$scope.AddTransaction = function () {
+			try {
+				if ($scope.transAmount != null && $scope.transAmount > 0 && $scope.selTraveler != null && $scope.selTraveler.length > 0) {
+					$scope.transactions.push({
+						Id: uuidv4(),
+						fullname: $scope.selTraveler,
+						description: $scope.transType,
+						amount: $scope.transAmount,
+					});
+					if ($scope.selectedTraveler != null) { // Refresh transaction datatable
+						$scope.selTransactions = $scope.transactions.filter(t => t.fullname == $scope.selectedTraveler);
+					}
+					refreshTravelersAndBalances();
+				}
+			} catch (err) { alert(err.message); }
+		};
+
+		$scope.RemoveTransaction = function (trans) {
+			try {
+				$scope.transactions = $scope.transactions.filter(function (obj) {
+					return obj.Id !== trans.Id;
+				});
+				$scope.selTransactions = $scope.transactions;
+				if ($scope.selectedTraveler != null) { // Refresh transaction datatable
+					$scope.selTransactions = $scope.transactions.filter(t => t.fullname == $scope.selectedTraveler);
+				}
+				refreshTravelersAndBalances();
+			} catch (err) { alert(err.message); }
+		};
+
+		$scope.ClearForm = function () {
+			try {
+				$scope.travelers = [];
+				$scope.transactions = []; $scope.selTransactions = $scope.transactions;
+				$scope.selectedTraveler = null;
+				updateTotalExpense();
+				document.getElementById("hdrSampleId").style.display = "none"
+			} catch (err) { alert(err.message); }
+		};
+
+		function refreshTravelersAndBalances() {
+			angular.forEach($scope.travelers, function (value, index) { // Refresh travelers and their balances
+				$scope.travelers[index].balance = getTotalBalance($scope.travelers[index].fullname);
+				updateTotalExpense();
+			});
+		}
+
+		function getTotalBalance(tName) {
+			var vTotal = 0.00;
+			try {
+				$scope.travelerTransactions = $scope.transactions.filter(t => t.fullname == tName);
+				angular.forEach($scope.travelerTransactions, function (value, index) {
+					var dAmount = +$scope.travelerTransactions[index].amount;
+					vTotal += dAmount;
+				});				
+			} catch (err) { alert(err.message); }
+			return vTotal; 
+		}
+
+		function updateTotalExpense() {
+			var vTotal = 0.00;
+			try {
+				if ($scope.transactions.length > 0) {
+					angular.forEach($scope.transactions, function (value, index) {
+						var dAmount = +$scope.transactions[index].amount;
+						vTotal += dAmount;
+					});
+					$scope.TotalExpense = vTotal;
+				} else { $scope.TotalExpense = 0; }
+			} catch (err) { alert(err.message); }
+		}
+
+		function uuidv4() { //https://stackoverflow.com/a/2117523
+			return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+			var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+			return v.toString(16);
+		});
+
+		}		
+	});
+</script>
+
+

@@ -1,0 +1,48 @@
+﻿@model TripCalculator.Models.TripCalculatorViewModel.vmTripCalculator
+<h3>Transactions</h3>
+
+<div class="col-sm-12">
+	<table class="TblFix">
+		<thead>
+			<tr style="font-family:Tahoma; font-size:medium; height:40px; background-color:aliceblue;">
+				<th class="cName">Traveler's Name</th>
+				<th class="cDescription">Transaction Description</th>
+				<th class="cAmount">Amount</th>
+				<th class="cAction">Action</th>
+			</tr>
+
+			<tr style="font-family:Tahoma; font-size:large; height:50px; background-color:ghostwhite;">
+				<th class="cName" style="padding:10px 5px;">
+					<div>
+						<select ng-model="selTraveler" class="form-control">
+							<option ng-repeat="x in travelers" value="{{x.fullname}}">{{x.fullname}}</option>
+						</select>
+					</div>
+				</th>
+				<th class="cDescription" style="padding:10px 5px;">
+					<div>
+						<input ng-model="transType" title="" class="form-control" placeholder="Transaction Description" />
+					</div>
+				</th>
+				<th class="cAmount" style="padding:10px 5px;">
+					<div>
+						<input ng-model="transAmount" title="" class="form-control" placeholder="Amount" />
+					</div>
+				</th>
+				<th class="cAction">
+					<button ng-click="AddTransaction()" type="submit" class="btn btn-primary">Add</button>
+				</th>
+			</tr>
+
+		</thead>
+		<tr ng-if="selectedTraveler.length > 0 && selectedTraveler != 'All'">
+			<td colspan="4" style="text-align:center;font-size:x-large;font-family:Verdana;">Filtered for: {{selectedTraveler}}</td>
+		</tr>
+		<tr ng-repeat="trans in selTransactions" style="border-bottom:solid thin; border-bottom-color:Highlight; height:30px;">
+			<td class="cName">{{trans.fullname}}</td>
+			<td class="cDescription">{{trans.description}}</td>
+			<td class="cAmount">{{trans.amount | number:2}}</td>
+			<td ng-click="RemoveTransaction(trans)" class="cAction" style="color:red;cursor:pointer;">Delete</td>
+		</tr>
+	</table>
+</div>
